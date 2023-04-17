@@ -35,6 +35,7 @@ For the HKEVP, the exponent measure is explicit for any number \eqn{n} of sites:
 If argument \code{fit} is provided, the predictive distribution of \deqn{V(z_1, \ldots, z_n)} is computed. If not, the function uses arguments \code{sites}, \code{knots}, \code{alpha}, and \code{tau}.
 }
 \examples{
+\donttest{
 sites <- as.matrix(expand.grid(1:3,1:3))
 loc <- sites[,1]*10
 scale <- 3
@@ -50,7 +51,7 @@ predict.em <- hkevp.expmeasure(1, fit = fit)
 true.em <- hkevp.expmeasure(1, sites, sites, alpha, tau)
 # plot(predict.em, ylim = range(predict.em, true.em), type = "l")
 # abline(h = true.em, col = 2, lwd = 2)
-
+}
 
 }
 \references{

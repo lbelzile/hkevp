@@ -117,6 +117,7 @@
 #'
 #'
 #' @examples
+#' \donttest{
 #' # Simulation of HKEVP:
 #' set.seed(1)
 #' sites <- as.matrix(expand.grid(1:3,1:3))
@@ -129,7 +130,7 @@
 #'
 #' # HKEVP fit:
 #' fit <- latent.fit(ysim, sites, niter = 1000)
-#'
+#' }
 #'
 #'
 hkevp.fit <- function(y, sites, knots, niter, nburn, nthin, quiet, trace, fit.margins, gev.vary, spatial.covariates, log.scale, correlation, mcmc.init, mcmc.prior, mcmc.jumps)

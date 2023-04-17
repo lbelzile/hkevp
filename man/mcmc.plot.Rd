@@ -17,6 +17,7 @@ mcmc.plot(fit, plot.spatial, mfrow)
 Plots of the resulting Markov chains obtained by the MCMC procedures \code{hkevp.fit} or \code{latent.fit}. May be used to assess graphically convergence of the chains.
 }
 \examples{
+\donttest{
 # Simulation of HKEVP:
 sites <- as.matrix(expand.grid(1:3,1:3))
 knots <- sites
@@ -32,7 +33,7 @@ fit <- hkevp.fit(ysim, sites, niter = 1000)
 
 # Markov chains plot:
 mcmc.plot(fit, TRUE)
-
+}
 
 
 

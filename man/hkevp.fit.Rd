@@ -119,6 +119,7 @@ The arguments \code{mcmc.init}, \code{mcmc.prior} and \code{mcmc.jumps} are name
 \item{\code{tau}, \code{alpha}, \code{A}, \code{B}: single values for each.}}}}
 }
 \examples{
+\donttest{
 # Simulation of HKEVP:
 set.seed(1)
 sites <- as.matrix(expand.grid(1:3,1:3))
@@ -131,7 +132,7 @@ ysim <- hkevp.rand(10, sites, sites, loc, scale, shape, alpha, tau)
 
 # HKEVP fit:
 fit <- latent.fit(ysim, sites, niter = 1000)
-
+}
 
 
 }

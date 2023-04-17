@@ -111,15 +111,13 @@ tau <- 2
 ysim <- hkevp.rand(15, sites, sites, loc, scale, shape, alpha, tau)
 
 # Latent Variable Model fit:
+\donttest{
 set.seed(1)
 fit <- latent.fit(ysim, sites, niter = 10000, nburn = 5000, nthin = 5)
-
-
-
 mcmc.plot(fit, TRUE)
 par(mfrow = c(2,2))
 apply(fit$GEV[,1,], 1, acf)
-
+}
 
 
 
