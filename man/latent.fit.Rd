@@ -101,6 +101,7 @@ The arguments \code{mcmc.init}, \code{mcmc.prior} and \code{mcmc.jumps} are name
 \item{mcmc.jumps: the possible elements are \code{gev} and \code{range}, vectors of length 3 (for each GEV parameter).}}
 }
 \examples{
+\donttest{
 # Simulation of HKEVP:
 sites <- as.matrix(expand.grid(1:4,1:4))
 loc <- sites[,1]*10
@@ -111,7 +112,6 @@ tau <- 2
 ysim <- hkevp.rand(15, sites, sites, loc, scale, shape, alpha, tau)
 
 # Latent Variable Model fit:
-\donttest{
 set.seed(1)
 fit <- latent.fit(ysim, sites, niter = 10000, nburn = 5000, nthin = 5)
 mcmc.plot(fit, TRUE)
