@@ -143,7 +143,7 @@ arma::mat HKEVP_llikGEVcore(arma::mat const& y, arma::mat const& gev, double con
     result.col(i) = pow(result.col(i), -1/(alpha*gev(i,2)));
   }
 
-  return arma::is_finite(result)? result : arma::zeros<arma::mat>(y.n_rows, y.n_cols);
+  return result.is_finite()? result : arma::zeros<arma::mat>(y.n_rows, y.n_cols);
 }
 
 
@@ -163,12 +163,11 @@ double HKEVP_llik(arma::mat const& y, arma::mat const& gev, double const& alpha,
   arma::vec llik_bySites = arma::zeros<arma::mat>(y.n_cols);
   arma::vec coreGEV = arma::zeros<arma::mat>(y.n_rows);
   int nSites = y.n_cols;
-
   if (log_scale) {
     for (int i=0; i<nSites; i++)
     {
       coreGEV = pow(1+gev(i,2)*(y.col(i)-gev(i,0))/exp(gev(i,1)),-1/(alpha*gev(i,2)));
-      llik_bySites(i) = is_finite(coreGEV) ?
+      llik_bySites(i) = coreGEV.is_finite() ?
       sum( (-log(alpha*exp(gev(i,1))) + log(theta.col(i))/alpha + (alpha*gev(i,2)+1)*log(coreGEV) - pow(theta.col(i),1/alpha)%coreGEV)%nas.col(i) ) :
         -arma::datum::inf;
     }
@@ -176,7 +175,7 @@ double HKEVP_llik(arma::mat const& y, arma::mat const& gev, double const& alpha,
     for (int i=0; i<nSites; i++)
     {
       coreGEV = pow(1+gev(i,2)*(y.col(i)-gev(i,0))/gev(i,1),-1/(alpha*gev(i,2)));
-      llik_bySites(i) = is_finite(coreGEV) ?
+      llik_bySites(i) = coreGEV.is_finite() ?
       sum( (-log(alpha*gev(i,1)) + log(theta.col(i))/alpha + (alpha*gev(i,2)+1)*log(coreGEV) - pow(theta.col(i),1/alpha)%coreGEV)%nas.col(i) ) :
         -arma::datum::inf;
     }
@@ -190,12 +189,11 @@ double latent_llik(arma::mat const& y, arma::mat const& gev, arma::mat const& na
   arma::vec llik_bySites = arma::zeros<arma::mat>(y.n_cols);
   arma::vec coreGEV = arma::zeros<arma::mat>(y.n_rows);
   int nSites = y.n_cols;
-
   if (log_scale) {
     for (int i=0; i<nSites; i++)
     {
       coreGEV = pow(1+gev(i,2)*(y.col(i)-gev(i,0))/exp(gev(i,1)),-1/(gev(i,2)));
-      llik_bySites(i) = is_finite(coreGEV) ?
+      llik_bySites(i) = coreGEV.is_finite() ?
       sum( ( -gev(i,1) + (gev(i,2)+1)*log(coreGEV) - coreGEV)%nas.col(i)) :
         -arma::datum::inf;
     }
@@ -203,7 +201,7 @@ double latent_llik(arma::mat const& y, arma::mat const& gev, arma::mat const& na
     for (int i=0; i<nSites; i++)
     {
       coreGEV = pow(1+gev(i,2)*(y.col(i)-gev(i,0))/gev(i,1),-1/(gev(i,2)));
-      llik_bySites(i) = is_finite(coreGEV) ?
+      llik_bySites(i) = coreGEV.is_finite() ?
       sum( (-log(gev(i,1)) + (gev(i,2)+1)*log(coreGEV) - coreGEV)%nas.col(i) ) :
         -arma::datum::inf;
     }
@@ -358,7 +356,7 @@ Rcpp::List mcmc_hkevp(arma::mat const& Y,
 
   // Log-likelihood:
   llik_chain(0) = HKEVP_llik(Y, GEV_current, alpha_current, theta_current, nas, log_scale);
-  if (!arma::is_finite(llik_chain(0))) {Rcpp::stop("Bad initialisation: Null Likelihood!");}
+  if (!std::isfinite(llik_chain(0))) {Rcpp::stop("Bad initialisation: Null Likelihood!");}
   double llik_current = llik_chain(0);
 
   // Candidates:
@@ -442,7 +440,7 @@ Rcpp::List mcmc_hkevp(arma::mat const& Y,
           + log(A_candidate(t,k)) - log(A_current(t,k));
 
           // Acceptance test
-          if ( (exp(A_logratio)>R::runif(0,1)) && (arma::is_finite(A_logratio)))
+          if ( (exp(A_logratio)>R::runif(0,1)) && (std::isfinite(A_logratio)))
           {
             A_current(t,k) = A_candidate(t,k);
             theta_current.row(t) = theta_candidate.row(t);
@@ -471,7 +469,7 @@ Rcpp::List mcmc_hkevp(arma::mat const& Y,
           - truncatedNormDensity_cpp(B_candidate(t,k), B_current(t,k), B_jumps);
 
           // Acceptance test
-          if ( (exp(B_logratio)>R::runif(0,1)) && (arma::is_finite(B_logratio)) )
+          if ( (exp(B_logratio)>R::runif(0,1)) && (std::isfinite(B_logratio)) )
           {
             B_current(t,k) = B_candidate(t,k);
             B_count++;
@@ -502,7 +500,7 @@ Rcpp::List mcmc_hkevp(arma::mat const& Y,
       ;
 
     // Acceptance test
-    if ( (exp(alpha_logratio)>R::runif(0,1)) && (arma::is_finite(alpha_logratio)) )
+    if ( (exp(alpha_logratio)>R::runif(0,1)) && (std::isfinite(alpha_logratio)) )
     {
       alpha_current = alpha_candidate;
       theta_current = theta_candidate;
@@ -530,7 +528,7 @@ Rcpp::List mcmc_hkevp(arma::mat const& Y,
       ;
 
     // Acceptance test
-    if ( (exp(tau_logratio)>R::runif(0,1)) && (arma::is_finite(tau_logratio)) )
+    if ( (exp(tau_logratio)>R::runif(0,1)) && (std::isfinite(tau_logratio)) )
     {
       tau_current = tau_candidate;
       theta_current = theta_candidate;
@@ -569,7 +567,7 @@ Rcpp::List mcmc_hkevp(arma::mat const& Y,
             ;
 
           // Acceptance test
-          if ( (exp(GEV_logratio)>R::runif(0,1)) && (arma::is_finite(GEV_logratio)) )
+          if ( (exp(GEV_logratio)>R::runif(0,1)) && (std::isfinite(GEV_logratio)) )
           {
             GEV_current(i,n_gev) = GEV_candidate(i,n_gev);
             llik_current = llik_candidate;
@@ -629,7 +627,7 @@ Rcpp::List mcmc_hkevp(arma::mat const& Y,
           ;
 
         // Acceptance test
-        if ( (exp(range_logratio)>R::runif(0,1)) && (arma::is_finite((range_logratio))) ) {
+        if ( (exp(range_logratio)>R::runif(0,1)) && (std::isfinite((range_logratio))) ) {
           ranges_current(n_gev) = range_candidate;
           GEVcovarMatrices.slice(n_gev) = covarMatrix_candidate;
           range_count(n_gev)++;
@@ -648,7 +646,7 @@ Rcpp::List mcmc_hkevp(arma::mat const& Y,
           - R::dnorm(GEV_current(0,n_gev), constant_gev_prior(0,n_gev), constant_gev_prior(1,n_gev), 1)
           ;
 
-        if ( (exp(GEV_logratio)>R::runif(0,1)) && (arma::is_finite(GEV_logratio)) ) {
+        if ( (exp(GEV_logratio)>R::runif(0,1)) && (std::isfinite(GEV_logratio)) ) {
           GEV_current.col(n_gev) = GEV_candidate.col(n_gev);
           llik_current = llik_candidate;
           GEV_count(n_gev)++;
@@ -831,7 +829,7 @@ Rcpp::List mcmc_deponly(arma::mat const& Y,
 
   // Log-likelihood:
   llik_chain(0) = HKEVP_llik(Y, GEV, alpha_current, theta_current, nas, log_scale);
-  if (!arma::is_finite(llik_chain(0))) {Rcpp::stop("Bad initialisation: Null Likelihood!");}
+  if (!std::isfinite(llik_chain(0))) {Rcpp::stop("Bad initialisation: Null Likelihood!");}
   double llik_current = llik_chain(0);
 
   // Candidates:
@@ -901,7 +899,7 @@ Rcpp::List mcmc_deponly(arma::mat const& Y,
           + log(A_candidate(t,k)) - log(A_current(t,k));
 
           // Acceptance test
-          if ( (exp(A_logratio)>R::runif(0,1)) && (arma::is_finite(A_logratio)))
+          if ( (exp(A_logratio)>R::runif(0,1)) && (std::isfinite(A_logratio)))
           {
             A_current(t,k) = A_candidate(t,k);
             theta_current.row(t) = theta_candidate.row(t);
@@ -930,7 +928,7 @@ Rcpp::List mcmc_deponly(arma::mat const& Y,
           - truncatedNormDensity_cpp(B_candidate(t,k), B_current(t,k), B_jumps);
 
           // Acceptance test
-          if ( (exp(B_logratio)>R::runif(0,1)) && (arma::is_finite(B_logratio)) )
+          if ( (exp(B_logratio)>R::runif(0,1)) && (std::isfinite(B_logratio)) )
           {
             B_current(t,k) = B_candidate(t,k);
             B_count++;
@@ -961,7 +959,7 @@ Rcpp::List mcmc_deponly(arma::mat const& Y,
       ;
 
     // Acceptance test
-    if ( (exp(alpha_logratio)>R::runif(0,1)) && (arma::is_finite(alpha_logratio)) )
+    if ( (exp(alpha_logratio)>R::runif(0,1)) && (std::isfinite(alpha_logratio)) )
     {
       alpha_current = alpha_candidate;
       theta_current = theta_candidate;
@@ -989,7 +987,7 @@ Rcpp::List mcmc_deponly(arma::mat const& Y,
       ;
 
     // Acceptance test
-    if ( (exp(tau_logratio) > R::runif(0,1)) && (arma::is_finite(tau_logratio)) )
+    if ( (exp(tau_logratio) > R::runif(0,1)) && (std::isfinite(tau_logratio)) )
     {
       tau_current = tau_candidate;
       theta_current = theta_candidate;
@@ -1181,7 +1179,7 @@ Rcpp::List mcmc_latent(arma::mat const& Y,
 
   // Log-likelihood:
   llik_chain(0) = latent_llik(Y, GEV_current, nas, log_scale);
-  if (!arma::is_finite(llik_chain(0))) {Rcpp::stop("Bad initialisation: Null Likelihood!");}
+  if (!std::isfinite(llik_chain(0))) {Rcpp::stop("Bad initialisation: Null Likelihood!");}
   double llik_current = llik_chain(0);
 
   // Candidates:
@@ -1246,7 +1244,7 @@ Rcpp::List mcmc_latent(arma::mat const& Y,
             ;
 
           // Acceptance test
-          if ( (exp(GEV_logratio)>R::runif(0,1)) && (arma::is_finite(GEV_logratio)) )
+          if ( (exp(GEV_logratio)>R::runif(0,1)) && (std::isfinite(GEV_logratio)) )
           {
             GEV_current(i,n_gev) = GEV_candidate(i,n_gev);
             llik_current = llik_candidate;
@@ -1306,7 +1304,7 @@ Rcpp::List mcmc_latent(arma::mat const& Y,
           ;
 
         // Acceptance test
-        if ( (exp(range_logratio)>R::runif(0,1)) && (arma::is_finite((range_logratio))) ) {
+        if ( (exp(range_logratio)>R::runif(0,1)) && (std::isfinite((range_logratio))) ) {
           ranges_current(n_gev) = range_candidate;
           GEVcovarMatrices.slice(n_gev) = covarMatrix_candidate;
           range_count(n_gev)++;
@@ -1325,7 +1323,7 @@ Rcpp::List mcmc_latent(arma::mat const& Y,
           - R::dnorm(GEV_current(0,n_gev), constant_gev_prior(0,n_gev), constant_gev_prior(1,n_gev), 1)
           ;
 
-        if ( (exp(GEV_logratio)>R::runif(0,1)) && (arma::is_finite(GEV_logratio)) ) {
+        if ( (exp(GEV_logratio)>R::runif(0,1)) && (std::isfinite(GEV_logratio)) ) {
           GEV_current.col(n_gev) = GEV_candidate.col(n_gev);
           llik_current = llik_candidate;
           GEV_count(n_gev)++;

@@ -3,6 +3,7 @@
 \docType{package}
 \name{hkevp}
 \alias{hkevp}
+\alias{hkevp-package}
 \title{A hierarchical model for spatial extreme values}
 \description{
 The HKEVP of \cite{Reich and Shaby (2012)} is a hierarchical model which can be fitted on point-referenced block maxima across a region of space. Its acronym stands for Hierarchical Kernel Extreme Value Model.
@@ -75,6 +76,13 @@ Reich, B. J., & Shaby, B. A. (2012). A hierarchical max-stable spatial model for
 Shaby, B. A., & Reich, B. J. (2012). Bayesian spatial extreme value analysis to assess the changing risk of concurrent high temperatures across large portions of European cropland. Environmetrics, 23(8), 638-648. <DOI:10.1002/env.2178>
 
 Smith, R. L. (1990). Max-stable processes and spatial extremes. Unpublished manuscript.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item Report bugs at \url{https://github.com/lbelzile/hkevp/issues/}
+}
+
 }
 \author{
 Quentin Sebille
